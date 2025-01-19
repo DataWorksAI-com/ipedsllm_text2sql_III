@@ -20,6 +20,7 @@ services:
       - redis
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
       - DB_URL=${DB_URL}
       - REDIS_URL=${REDIS_URL}
       - REDIS_TOKEN=${REDIS_TOKEN}
