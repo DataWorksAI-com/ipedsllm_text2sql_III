@@ -1,5 +1,7 @@
-from typing import List, Any
+# Author: Liran
+# Description: This file contains the TableFormatter class, which is responsible for formatting the table context retrived after semantic search into a string
 
+from typing import List, Any
 
 class TableFormatter:
 

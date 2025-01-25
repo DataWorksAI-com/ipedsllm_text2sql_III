@@ -1,3 +1,5 @@
+# Author: Liran
+# Description: This file contains the LLMProvider class which is used to interact with different LLM providers (ollama, openai, gemini)
 import os
 import ollama
 import requests

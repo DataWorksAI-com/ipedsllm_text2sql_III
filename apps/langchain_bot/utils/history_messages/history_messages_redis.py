@@ -1,3 +1,6 @@
+# Author: Abhishek
+# Description: This file contains the class to store the chat history in Redis database.
+
 import json
 import logging
 from typing import List, Optional

@@ -1,8 +1,13 @@
+# Author: Abhishek
+# This file contains the helper functions for the langchain_bot app to interact with the Redis database hosted on Upstash to store the chat history of the users. 
+# The create_session_factory function creates a factory that can retrieve chat histories.
+# The get_chat_history function retrieves the chat history from a user id and conversation id.
+# The _is_valid_identifier function checks if the value is a valid identifier.
+# The _per_request_config_modifier function updates the config for each request.
 import re
 from typing import  Callable, Dict, Any
 from langchain_core.chat_history import BaseChatMessageHistory
 from requests import Request
-
 from apps.langchain_bot.env import redis_url, redis_token
 from apps.langchain_bot.utils.history_messages.history_messages_redis import RedisChatMessageHistory
 
