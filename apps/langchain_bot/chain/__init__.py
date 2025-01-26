@@ -1,5 +1,6 @@
-#TODO- add author date
-##TODO- add role of class and functions retails
+# Author 1: Liran
+# Author 2: Abhishek
+# This file contains the chain of runnables that process the user's question and generate the SQL query and results.
 from dotenv import load_dotenv
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough, RunnableParallel
 from apps.langchain_bot.dependencies import document_retriever, llm, database_information_retrieval
@@ -7,7 +8,7 @@ from typing import Dict, Any
 from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
 from langchain_core.runnables.utils import AddableDict
 
-#TODO- add comments ; role and what this function is doing
+# Method to retrieve the context containing the top k tables based on the user's query by invoking the semantic search similarity
 def get_context(inputs: Dict[str, Any]) -> str:
     """
     Retrieves the top k tables based on the user's query and formats them as a string.
@@ -21,8 +22,7 @@ def get_context(inputs: Dict[str, Any]) -> str:
     context = document_retriever.find_top_k_similar(inputs["question"], k=3)
     return context
 
-#TODO- add comments ; role and what this function is doing
-
+# Method to create the final prompt using the user's question, context containing top k table information, and guidelines for generating the SQL query
 def create_final_prompt(question: str, context: str) -> str:
     final_prompt = f"""
     You are a PostgreSQL expert. Based on the input question, generate a syntactically correct PostgreSQL query that strictly adheres to the following rules:  
@@ -43,7 +43,7 @@ def create_final_prompt(question: str, context: str) -> str:
     output = AddableDict({'question':question['question'], 'messages': question['messages'], 'final_prompt': final_prompt})
     return output
 
-#TODO- add comments ; role and what this function is doing
+# Method to generate the SQL query after invoke the final prompt using the language model
 def generate_sql_llm(inputs: Dict[str, Any]) -> str:
     """
     Generates SQL code using the provided final prompt.
@@ -60,7 +60,7 @@ def generate_sql_llm(inputs: Dict[str, Any]) -> str:
     output = inputs + AddableDict({'sql_query': sql_query})
     return output
 
-#TODO- add comments ; role and what this function is doing
+# Method to excute the SQL query and return the results 
 def get_query_results(inputs: Dict[str, Any]) -> Any:
     """
     Executes the provided SQL query and returns the results.
@@ -79,7 +79,7 @@ def get_query_results(inputs: Dict[str, Any]) -> Any:
     output = inputs +  AddableDict({'query_results': query_results['result']})
     return output
 
-#TODO- add comments ; role and what this function is doing
+# Method to rephrase the sql query results using the language model
 def rephrase_query_results(inputs: Dict[str, Any]) -> str:
     
     answer_prompt=f"""Given the following user question, corresponding SQL query, and SQL result, provide answer for the user question.
@@ -90,14 +90,14 @@ def rephrase_query_results(inputs: Dict[str, Any]) -> str:
     return llm.invoke(answer_prompt)
 
 
-# Wrap functions with RunnableLambda
+# Wrap functions with RunnableLambda to create runnables that process the input and send the output to the next runnable in the chain
 get_context_runnable = RunnableLambda(get_context)
 create_final_prompt_runnable = RunnableLambda(lambda inputs: create_final_prompt(**inputs))
 generate_sql_llm_runnable = RunnableLambda(generate_sql_llm)
 get_query_results_runnable = RunnableLambda(get_query_results)
 rephrase_query_results_runnable = RunnableLambda(rephrase_query_results)
 
-# Compose the chain using the pipe operator
+# Compose the chain using the pipe operator.
 chain = (
         RunnableParallel({
             "context": get_context_runnable,

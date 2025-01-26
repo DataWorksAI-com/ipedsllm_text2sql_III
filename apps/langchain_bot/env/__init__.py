@@ -1,9 +1,7 @@
-#TODO add author, date
-#TODO add role of this class and comments
+#Author: Liran
+# This file contains the initialization of the environment variables
 import os
-
 from dotenv import load_dotenv
-
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
