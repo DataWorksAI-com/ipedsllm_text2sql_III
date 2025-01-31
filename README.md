@@ -47,7 +47,7 @@ Download and install Visual Studio Code from the [official website](https://code
 
 #### Clone the Repository:
 ```bash
-git clone https://github.com/hemadataworksai/ipedsllm.git
+git clone https://github.com/hemadataworksai/ipedsllm_text2sql_III.git
 ```
 
 ---
