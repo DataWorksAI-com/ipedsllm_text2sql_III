@@ -139,10 +139,17 @@ Note: The CLI will not work unless a Redis database is running. Docker is used t
 
 ## Docker Compose
 
-Installing Docker:
-
+### Installing Docker:
+#### Docker Desktop (wants license)
 https://docs.docker.com/engine/install/
 
+#### Colima (no license)
+[Install Colima with Homebrew](https://smallsharpsoftwaretools.com/tutorials/use-colima-to-run-docker-containers-on-macos/)
+```brew update
+brew install docker docker-compose
+brew install --HEAD colima
+colima start
+```
 ### Build the Docker Image:
 ```bash
 docker-compose build --no-cache
