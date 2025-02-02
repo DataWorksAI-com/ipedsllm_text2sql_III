@@ -119,6 +119,11 @@ https://ollama.com/
 
 ---
 
+### Embedded Model Setup:
+1. Download the embedding model from [Google Drive](https://drive.google.com/drive/folders/1ANo_rGZ_bScGuDaTetj07YjxxFr9CC7G).
+2. Create a folder `models/embedding_model/embedding_question2context`.
+3. Unzip and copy all files into this folder.
+
 ### 7. Run the Chatbot
 
 #### Start the Chatbot:
@@ -129,11 +134,7 @@ PYTHONPATH=. python apps/langchain_bot/app_run.py
 - If using `ollama` as the provider, wait for the local LLM model to download.
 - Access the chatbot at: [http://localhost:8001/playground/](http://localhost:8001/playground/)
 
-#### Embedded Model Setup:
-1. Download the embedding model from [Google Drive](https://drive.google.com/drive/folders/1ANo_rGZ_bScGuDaTetj07YjxxFr9CC7G).
-2. Create a folder `models/embedding_model/embedding_question2context`.
-3. Unzip and copy all files into this folder.
-
+Note: The CLI will not work unless a Redis database is running. Docker is used to start both Redis and the application
 ---
 
 ## Docker Compose
