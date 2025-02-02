@@ -123,7 +123,7 @@ https://ollama.com/
 
 #### Start the Chatbot:
 ```bash
-PYTHONPATH=. python run apps/langchain_bot/app_run.py
+PYTHONPATH=. python apps/langchain_bot/app_run.py
 ```
 
 - If using `ollama` as the provider, wait for the local LLM model to download.
