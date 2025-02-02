@@ -126,7 +126,9 @@ https://ollama.com/
 
 ### 7. Run the Chatbot
 
-#### Start the Chatbot:
+#### Start the Chatbot with CLI:
+Note The CLI startup will not work unless a Redis database is running. Docker is used to start both Redis and the application
+
 ```bash
 PYTHONPATH=. python apps/langchain_bot/app_run.py
 ```
@@ -134,7 +136,6 @@ PYTHONPATH=. python apps/langchain_bot/app_run.py
 - If using `ollama` as the provider, wait for the local LLM model to download.
 - Access the chatbot at: [http://localhost:8001/playground/](http://localhost:8001/playground/)
 
-Note: The CLI will not work unless a Redis database is running. Docker is used to start both Redis and the application
 ---
 
 ## Docker Compose
