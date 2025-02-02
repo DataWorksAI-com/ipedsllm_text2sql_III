@@ -146,7 +146,8 @@ https://docs.docker.com/engine/install/
 
 #### Colima (no license)
 [Install Colima with Homebrew](https://smallsharpsoftwaretools.com/tutorials/use-colima-to-run-docker-containers-on-macos/)
-```brew update
+```bash
+brew update
 brew install docker docker-compose
 brew install --HEAD colima
 colima start
