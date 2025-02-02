@@ -10,7 +10,11 @@ services:
     network_mode: bridge
     volumes:
       - redis_data:/data
-
+  redis-stack:
+    image: redis/redis-stack-server:latest
+    container_name: redis-stack
+    ports:
+      - "6380:6379"
   langchain_bot:
     build:
       context: .
@@ -26,6 +30,8 @@ services:
       - REDIS_TOKEN=${REDIS_TOKEN}
       - OLLAMA_HOST=${OLLAMA_HOST}
       - LLM_PROVIDER=${LLM_PROVIDER}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
     ports:
       - "8001:8001"
     restart: always
