@@ -1,17 +1,15 @@
+# Author: Liran
+# Description: The first step is to create an in-memory database for embedding documents by reading the JSON file data in the init method.
+# This is the initial setup.
+# Then, we have a class that has already loaded the "database". Now we can query the database to get the top k similar documents.
 import json
-
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-
 from apps.langchain_bot.phases.context.table_formatter import TableFormatter
 
-
-#the first step is create an in memory database , for embedding document , reading the json file data , on init method
-#this is the first setup we do 
-#then , we have class , that already loaded the "database" , now we can query the database using a get k top similar document
 class DocumentRetriever:
-    #initialize the retriever by loading the custom model (fine-tuned in Google Colab) and the data, the model should be downloaded from Readme file
-   #create an in memory database
+    # initialize the retriever by loading the custom model (fine-tuned in Google Colab) and the data, the model should be downloaded from Readme file
+    # Create an in memory database
     def __init__(self, json_file_path = './data/data_for_embedding/tableinfo.json', model_name='./models/embedding_model/embedding_question2context'):
 
         # Load the model and the JSON data
@@ -43,9 +41,7 @@ class DocumentRetriever:
                    'metadata': self.metadata_func(table_info[0],{})
                 }
         return embeddings
-
         
-
     # functiom to retrieve metadata for a given document to be stored alongside the embedding
     def metadata_func(self, record: dict, metadata: dict) -> dict:
         def column_retriever(ls):

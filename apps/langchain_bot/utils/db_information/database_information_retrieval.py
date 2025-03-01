@@ -1,3 +1,5 @@
+# Author:  Liran
+# Description: This file contains the DatabaseInformationRetrieval class, which is responsible for interacting with a database to retrieve metadata and sample data from tables.
 import os
 from langchain_community.utilities.sql_database import SQLDatabase
 from dotenv import load_dotenv

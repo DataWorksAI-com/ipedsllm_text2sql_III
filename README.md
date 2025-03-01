@@ -47,7 +47,7 @@ Download and install Visual Studio Code from the [official website](https://code
 
 #### Clone the Repository:
 ```bash
-git clone https://github.com/hemadataworksai/ipedsllm.git
+git clone https://github.com/hemadataworksai/ipedsllm_text2sql_III.git
 ```
 
 ---
@@ -93,11 +93,13 @@ REDIS_URL=redis://host.docker.internal:6379  # Use redis://localhost:6379 if nee
 REDIS_TOKEN=1233
 TOKENIZERS_PARALLELISM=true
 OLLAMA_HOST=http://host.docker.internal:11434  # Use http://localhost:11434 if needed
+GEMINI_API_KEY=xxx
 ```
 
 - Replace `DB_URL` with the appropriate database connection string.
-- Set `LLM_PROVIDER` to `ollama` or `openai`.
+- Set `LLM_PROVIDER` to `ollama` or `openai` or `gemini`.
 - If using `openai`, provide a valid `OPENAI_API_KEY`.
+- If using `gemini`, provide a valid `GEMINI_API_KEY`.
 
 ##
 Install Ollama
@@ -111,31 +113,45 @@ https://ollama.com/
 3. Navigate to **Profile > User API Keys**.
 4. Copy the key and paste it into the `.env` file under `OPENAI_API_KEY`.
 
+#### Create an Gemini API Key (if using Gemini):
+1. Go to https://aistudio.google.com/apikey
+2. Copy the key and paste it into the `.env` file under `GEMINI_API_KEY`.
+
 ---
+
+### Embedded Model Setup:
+1. Download the embedding model from [Google Drive](https://drive.google.com/drive/folders/1ANo_rGZ_bScGuDaTetj07YjxxFr9CC7G).
+2. Create a folder `models/embedding_model/embedding_question2context`.
+3. Unzip and copy all files into this folder.
 
 ### 7. Run the Chatbot
 
-#### Start the Chatbot:
+#### Start the Chatbot with CLI:
+Note The CLI startup will not work unless a Redis database is running. Docker is used to start both Redis and the application
+
 ```bash
-PYTHONPATH=. python run apps/langchain_bot/app_run.py
+PYTHONPATH=. python apps/langchain_bot/app_run.py
 ```
 
 - If using `ollama` as the provider, wait for the local LLM model to download.
 - Access the chatbot at: [http://localhost:8001/playground/](http://localhost:8001/playground/)
 
-#### Embedded Model Setup:
-1. Download the embedding model from [Google Drive](https://drive.google.com/drive/folders/1ANo_rGZ_bScGuDaTetj07YjxxFr9CC7G).
-2. Create a folder `models/embedding_model/embedding_question2context`.
-3. Unzip and copy all files into this folder.
-
 ---
 
 ## Docker Compose
 
-Installing Docker:
-
+### Installing Docker:
+#### Docker Desktop (wants license)
 https://docs.docker.com/engine/install/
 
+#### Colima (no license)
+[Install Colima with Homebrew](https://smallsharpsoftwaretools.com/tutorials/use-colima-to-run-docker-containers-on-macos/)
+```bash
+brew update
+brew install docker docker-compose
+brew install --HEAD colima
+colima start
+```
 ### Build the Docker Image:
 ```bash
 docker-compose build --no-cache
