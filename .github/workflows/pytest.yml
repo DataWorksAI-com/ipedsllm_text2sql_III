@@ -1,13 +1,14 @@
 name: Run Pytest Tests
 
-on:
-  pull_request:
-    branches:
-      - main  # Trigger workflow for PRs targeting the main branch
+on: push
+
+  #pull_request:
+    #branches:
+     # - main  # Trigger workflow for PRs targeting the main branch
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest   #Git Action runner 
 
     steps:
       # Checkout the code so the workflow can access it 
@@ -31,31 +32,11 @@ jobs:
         run: |
           mkdir -p models/embedding_model
           # Download the embedding model from [Google Drive](https://drive.google.com/drive/folders/1ANo_rGZ_bScGuDaTetj07YjxxFr9CC7G)
-          cp -r models/embedding_model/embedding_question2context  
+          cp -r models/embedding_model/embedding_question2context  models/embedding_model
 
       # Run pytest on test folder and store logs 
       - name: Run Pytest
         run: |
-          python test.py > pytest_results.log  || true  
+           pytest test/  > pytest_results.log  || true  
 
        
-      #  Upload test results as artifact
-      - name: Upload test results as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: result.log  # Upload test results 
-
-      #  Generate  test report
-      - name: Generate test report
-        run: |
-          pytest tests/ --maxfail=5 --disable-warnings --capture=no > report.txt
-          echo "Generated Test Report"
-          cat report.txt  # Print report
-
-      #  Upload the detailed test report as artifact
-      - name: Upload Test Report Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-report
-          path: report.txt  
