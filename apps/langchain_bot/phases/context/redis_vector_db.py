@@ -5,7 +5,7 @@
 import json
 from sentence_transformers import SentenceTransformer
 from apps.langchain_bot.phases.context.table_formatter import TableFormatter
-from apps.langchain_bot.env import redis_host, redis_port
+from apps.langchain_bot.env import  redis_url
 import json
 from sentence_transformers import SentenceTransformer
 import numpy as np
@@ -17,12 +17,12 @@ from redis.commands.search.result import Result
 from typing import List
 
 
-class DocumentRetriever:
-    def __init__(self, json_file_path='./data/data_for_embedding/tableinfo.json', model_name='./models/embedding_model/embedding_question2context'):
+class RedisDocumentRetriever:
+    def __init__(self, redis_url:str,json_file_path='./data/data_for_embedding/tableinfo.json', model_name='./models/embedding_model/embedding_question2context'):
         # Initialize the SentenceTransformer model with the given model name
         self.model = SentenceTransformer(model_name)
         # Connect to the Redis server using the specified host and port
-        self.client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+        self.client = redis.Redis.from_url(url=redis_url, decode_responses=True)
         # Load documents from the specified JSON file path
         self.documents = self.load_json(json_file_path)
         # Create document embeddings and store them in Redis
@@ -162,7 +162,7 @@ class DocumentRetriever:
  
 # Usage
 if __name__ == "__main__":
-    retriever = DocumentRetriever()
+    retriever = RedisDocumentRetriever(redis_url)
     question = "Which schools require high school GPA?"
     context = retriever.find_top_k_similar(question, k=3)
     print(context)
