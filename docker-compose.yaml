@@ -2,15 +2,13 @@ version: '3.9'
 
 services:
   redis:
-    image: redis:latest
-    container_name: redis-text2sql
+    image: redis/redis-stack-server:latest
+    container_name: redis-stack
     ports:
       - "6379:6379"
-    command: ["redis-server", "--appendonly", "yes"]
     network_mode: bridge
     volumes:
       - redis_data:/data
-
   langchain_bot:
     build:
       context: .
@@ -30,8 +28,6 @@ services:
       - "8001:8001"
     restart: always
     volumes:
-      - ./models:/root_dir/models
       - ./data:/root_dir/data
-
 volumes:
   redis_data:
