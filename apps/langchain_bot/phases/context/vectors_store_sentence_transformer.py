@@ -6,14 +6,15 @@ import json
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from apps.langchain_bot.phases.context.table_formatter import TableFormatter
-
+import os
 class DocumentRetriever:
     # initialize the retriever by loading the custom model (fine-tuned in Google Colab) and the data, the model should be downloaded from Readme file
     # Create an in memory database
-    def __init__(self, json_file_path = './data/data_for_embedding/tableinfo.json', model_name='./models/embedding_model/embedding_question2context'):
+    def __init__(self, json_file_path = './data/data_for_embedding/tableinfo.json', model_name='dataWorksAI/embedding_model_tabledescriptions_questions_iped6tables'):
 
         # Load the model and the JSON data
-        self.model = SentenceTransformer(model_name)
+        
+        self.model = SentenceTransformer(model_name, token=os.environ.get("HF_TOKEN"))
         self.documents = self.load_json(json_file_path)
         #Generate embeddings for each document's table description
         self.doc_embeddings = self.create_doc_embeddings()
@@ -89,6 +90,8 @@ class DocumentRetriever:
  
 # Usage
 if __name__ == "__main__":
+    from dotenv import load_dotenv
+    load_dotenv()
     retriever = DocumentRetriever()
     question = "Which schools require high school GPA?"
     context = retriever.find_top_k_similar(question, k=3)
