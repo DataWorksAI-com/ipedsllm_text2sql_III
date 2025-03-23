@@ -3,6 +3,8 @@
 # This is the initial setup.
 # Then, we have a class that has already loaded the "database". Now we can query the database to get the top k similar documents.
 import json
+import os
+
 from sentence_transformers import SentenceTransformer
 from apps.langchain_bot.phases.context.table_formatter import TableFormatter
 from apps.langchain_bot.env import  redis_url
@@ -18,9 +20,9 @@ from typing import List
 
 
 class RedisDocumentRetriever:
-    def __init__(self, redis_url:str,json_file_path='./data/data_for_embedding/tableinfo.json', model_name='./models/embedding_model/embedding_question2context'):
+    def __init__(self, redis_url:str,json_file_path='./data/data_for_embedding/tableinfo.json', model_name='dataWorksAI/embedding_model_tabledescriptions_questions_iped6tables'):
         # Initialize the SentenceTransformer model with the given model name
-        self.model = SentenceTransformer(model_name)
+        self.model = SentenceTransformer(model_name, token=os.environ.get("HF_TOKEN"))
         # Connect to the Redis server using the specified host and port
         self.client = redis.Redis.from_url(url=redis_url, decode_responses=True)
         # Load documents from the specified JSON file path
