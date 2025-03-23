@@ -43,6 +43,6 @@ jobs:
       # Run pytest on test folder and store logs 
       - name: Run Pytest
         run: |
-           pytest test/  > pytest_results.log  || true  
+           python -m pytest test/  > pytest_results.log  || true  
 
        
