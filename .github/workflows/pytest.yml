@@ -15,6 +15,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Cache Python dependencies
+      - name: Cache Python dependencies
+        uses: actions/cache@v2
+        with:
+         # Cache the pip cache directory
+         path: | 
+           ~/.cache/pip
+         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+         restore-keys: |
+           ${{ runner.os }}-pip-
+
       # Set up Python version
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -27,12 +38,7 @@ jobs:
           pip install --upgrade pip
           pip install -r apps/langchain_bot/requirements.txt 
 
-      # Download embedding model
-      - name: Download embedding model
-        run: |
-          mkdir -p models/embedding_model
-          # Download the embedding model from [Google Drive](https://drive.google.com/drive/folders/1ANo_rGZ_bScGuDaTetj07YjxxFr9CC7G)
-          cp -r models/embedding_model/embedding_question2context  models/embedding_model
+      
 
       # Run pytest on test folder and store logs 
       - name: Run Pytest
