@@ -16,3 +16,4 @@ typing-extensions==4.12.2
 sse-starlette==0.10.0
 psycopg2-binary==2.9.9
 redis==5.2.0
+pytest==8.3.5
