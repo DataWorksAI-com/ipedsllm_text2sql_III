@@ -38,11 +38,12 @@ jobs:
           pip install --upgrade pip
           pip install -r apps/langchain_bot/requirements.txt 
 
-      
-
+     
       # Run pytest on test folder and store logs 
       - name: Run Pytest
         run: |
            python -m pytest test/  > pytest_results.log  || true  
+        env: # Or as an environment variable
+            HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
        
