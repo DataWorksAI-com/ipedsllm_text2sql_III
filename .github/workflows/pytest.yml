@@ -1,0 +1,48 @@
+name: Run Pytest Tests
+
+on: push
+
+  #pull_request:
+    #branches:
+     # - main  # Trigger workflow for PRs targeting the main branch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest   #Git Action runner 
+
+    steps:
+      # Checkout the code so the workflow can access it 
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Cache Python dependencies
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+         # Cache the pip cache directory
+         path: | 
+           ~/.cache/pip
+         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+         restore-keys: |
+           ${{ runner.os }}-pip-
+
+      # Set up Python version
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'  
+
+      # Install dependencies from requirements.txt
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r apps/langchain_bot/requirements.txt 
+
+      
+
+      # Run pytest on test folder and store logs 
+      - name: Run Pytest
+        run: |
+           python -m pytest test/  > pytest_results.log  || true  
+
+       
