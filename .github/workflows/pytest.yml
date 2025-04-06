@@ -37,13 +37,31 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r apps/langchain_bot/requirements.txt 
+          pip install pytest pytest-cov pytest-html
 
      
       # Run pytest on test folder and store logs 
-      - name: Run Pytest
+       #- name: Run Pytest
+        #run: |
+           #python -m pytest test/    
+        #env: # Or as an environment variable
+            #HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    
+      # Run Pytest and generate  reports
+      - name: Run Pytest and Generate Reports
         run: |
-           python -m pytest test/    
-        env: # Or as an environment variable
-            HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          pytest --cov=apps/langchain_bot --cov-report=xml --cov-report=html --junitxml=report.xml --html=report.html
+        env: 
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      # Upload test reports (HTML and XML) as artifacts
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: |
+            report.html
+            report.xml
+            htmlcov/
 
        
