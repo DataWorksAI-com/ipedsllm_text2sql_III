@@ -13,7 +13,6 @@ class DocumentRetriever:
     def __init__(self, json_file_path = './data/data_for_embedding/tableinfo.json', model_name='dataWorksAI/embedding_model_tabledescriptions_questions_iped6tables'):
 
         # Load the model and the JSON data
-
         self.model = SentenceTransformer(model_name, token=os.environ.get("HF_TOKEN"))
         self.documents = self.load_json(json_file_path)
         #Generate embeddings for each document's table description
