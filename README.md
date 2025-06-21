@@ -90,7 +90,6 @@ OPENAI_API_KEY=xxx
 LLM_PROVIDER=ollama  # Options: ollama or openai
 DB_URL=xxx
 REDIS_URL=redis://host.docker.internal:6379  # Use redis://localhost:6379 if needed
-REDIS_TOKEN=1233
 TOKENIZERS_PARALLELISM=true
 OLLAMA_HOST=http://host.docker.internal:11434  # Use http://localhost:11434 if needed
 GEMINI_API_KEY=xxx

@@ -8,7 +8,7 @@ import re
 from typing import  Callable, Dict, Any
 from langchain_core.chat_history import BaseChatMessageHistory
 from requests import Request
-from apps.langchain_bot.env import redis_url, redis_token
+from apps.langchain_bot.env import redis_url
 from apps.langchain_bot.utils.history_messages.history_messages_redis import RedisChatMessageHistory
 
 
@@ -40,7 +40,6 @@ def create_session_factory() -> Callable[[str, str], BaseChatMessageHistory]:
 
         return RedisChatMessageHistory(
             url=redis_url,
-            token=redis_token,
             ttl=604800,
             session_id=f"{user_id}-{conversation_id}",
         )

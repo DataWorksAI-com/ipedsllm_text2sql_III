@@ -22,12 +22,11 @@ class RedisChatMessageHistory(BaseChatMessageHistory):
             self,
             session_id: str,
             url: str = "",
-            token: str = "",
             key_prefix: str = "message_store:",
             ttl: Optional[int] = None,
     ):
 
-        if url == "" or token == "":
+        if url == "":
             raise ValueError(
                 "REDIS_URL and REDIS_TOKEN are needed."
             )
