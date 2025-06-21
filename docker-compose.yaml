@@ -7,7 +7,7 @@ services:
     ports:
       - "6379:6379"
     command: ["redis-server", "--appendonly", "yes"]
-    network_mode: bridge
+    network_mode: host
     volumes:
       - redis_data:/data
 
@@ -16,6 +16,7 @@ services:
       context: .
       dockerfile: dockerfiles/langchain_bot/Dockerfile
     container_name: langchain_bot
+    network_mode: host
     depends_on:
       - redis
     environment:
