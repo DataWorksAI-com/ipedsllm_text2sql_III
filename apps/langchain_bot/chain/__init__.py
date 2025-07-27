@@ -7,6 +7,7 @@ from apps.langchain_bot.dependencies import document_retriever, llm, database_in
 from typing import Dict, Any
 from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
 from langchain_core.runnables.utils import AddableDict
+import pandas as pd
 
 # Method to retrieve the context containing the top k tables based on the user's query by invoking the semantic search similarity
 def get_context(inputs: Dict[str, Any]) -> str:
@@ -108,3 +109,64 @@ chain = (
         | get_query_results_runnable
         | rephrase_query_results_runnable
 )
+
+from langchain.schema.runnable import Runnable
+
+class DebugStep(Runnable):
+    def __init__(self, runnable, name):
+        self.runnable = runnable
+        self.name = name
+
+    def invoke(self, input, config=None):
+        print(f"--- {self.name} INPUT ---")
+        print(input)
+        output = self.runnable.invoke(input, config=config)
+        print(f"--- {self.name} OUTPUT ---")
+        print(output)
+
+        # Return both original output and debug trace
+        return {
+            **(input if isinstance(input, dict) else {"input": input}),
+            self.name: output
+        }
+
+if __name__ == "__main__":
+    chain_debug = (
+            RunnableParallel({
+                "context": DebugStep(get_context_runnable, "get_context_runnable"),
+                "question": RunnablePassthrough(),
+            })
+            | DebugStep(create_final_prompt_runnable, "create_final_prompt_runnable")
+            | DebugStep(generate_sql_llm_runnable, "generate_sql_llm_runnable")
+            | DebugStep(get_query_results_runnable, "get_query_results_runnable")
+            | DebugStep(rephrase_query_results_runnable, "rephrase_query_results_runnable")
+    )
+
+    df = pd.read_csv("data/test_data/eval_data.csv")
+    for row in df.iterrows():
+        user_question  = row["Human Language"]
+        results = chain_debug.invoke({"question": user_question})
+        print("=== FINAL RESULT ===")
+        print(results)
+        # {
+        #     "question": "Find all users who joined last week",
+        #     "get_context_runnable": "...context output...",
+        #     "create_final_prompt_runnable": "...final prompt...",
+        #     "generate_sql_llm_runnable": "SELECT * FROM users WHERE ...",
+        #     "get_query_results_runnable": "...query results...",
+        #     "rephrase_query_results_runnable": "There are 12 users who joined last week."
+        # }
+
+
+        ## Evaluation Compare
+        ## Ground true vs Predict
+        if row["Table Name ( Main)"] == results["get_context_runnable"]["TABLE_NAME"]:
+            pass
+        if row["Expected SQL Query"] == results["generate_sql_llm_runnable"]:
+            pass
+            ## Calculate Accuracy
+
+
+
+
+

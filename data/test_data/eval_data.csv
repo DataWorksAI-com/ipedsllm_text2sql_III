@@ -1,0 +1,1332 @@
+Sr. No.,Human Language ,Table Name ( Main),Context,Expected SQL Query,Generated SQL,"Type of Query (Simple, Ambiguous, Complex)",Response（chatbot）,Status (Correct/Incorrect),Status (1/0),Expected Response,Execution Time in Sec,Tokens Used,Cost in $,Raw  Cost,Tester,Failure Categories,Comments,Bug Fixing Details,Bug Owner,Bug Category (DB bug),Restructed the query question to chatbot
+1,How many students are in the adjusted cohort at each institution?,GR2022_l2_rv,, ,,Simple,,,,,,,,,Shubh,,,,,,
+2,How many students were in the revised initial cohort?,GR2022_l2_rv,"Table Names:
+
+gr2022_l2_rv
+Column Names:
+
+UNITID
+
+LINE_10
+Encoded Values:
+
+No encoded values were found in the provided context.","SELECT UNITID, LINE_10 AS revised_cohort
+FROM ipedsdata.gr2022_l2_rv;",,Simple,,,,,,,,,Shubh,,,,,,
+3,Which institutions had zero nonresident alien students complete the program?,GR2022_l2_rv,"Table Names:
+
+gr2022_l2_rv
+Column Names:
+
+UNITID
+
+NRLIN45
+
+NRLIN10
+Encoded Values:
+
+No encoded values were found in the provided context.","SELECT UNITID
+FROM ipedsdata.gr2022_l2_rv
+WHERE NRLIN45 = 0 OR NRLIN10 = 0;",,Simple,,,,,,,,,Shubh,,,,,,
+4,Are there any schools that didn’t report graduation data?,GR2022_l2_rv,"Table Names:
+
+gr2022_l2_rv
+Column Names:
+
+UNITID
+
+LINE_50
+
+LINE_55
+Encoded Values:
+
+No encoded values were found in the provided context.","SELECT UNITID
+FROM ipedsdata.gr2022_l2_rv
+WHERE LINE_50 IS NULL OR LINE_50 = 0
+   OR LINE_55 IS NULL OR LINE_55 = 0;",,Ambiguous,,,,,,,,,Shubh,,,,,,
+5,Which public institutions in California had over 100 students in their adjusted cohort?,"GR2022_l2_rv, IC_2022_Campuses","Table Names:
+
+gr2022_l2_rv
+
+ic_2022_campuses
+Column Names:
+
+UNITID
+
+LINE_50
+
+PCCONTROL
+
+PCSTABBR
+
+PCINSTNM
+Encoded Values:
+
+PCCONTROL = 1 → Public
+
+PCSTABBR = 'CA' → California","SELECT ic.PCINSTNM, ic.PCCONTROL, ic.PCSTABBR, gr.LINE_50 AS adjusted_cohort
+FROM ipedsdata.gr2022_l2_rv gr
+JOIN ipedsdata.ic2022campuses ic ON gr.UNITID = ic.UNITID
+WHERE ic.PCCONTROL = 1
+  AND ic.PCSTABBR = 'CA'
+  AND gr.LINE_50 > 100;",,Complex,,,,,,,,,Shubh,,,,,,
+6,What is the average graduation count by state?,"GR2022_l2_rv, IC_2022_Campuses","Table Names:
+
+gr2022_l2_rv
+
+ic_2022_campuses
+Column Names:
+
+UNITID
+
+LINE_55
+
+PCSTABBR
+Encoded Values:
+
+No encoded values were found in the provided context.","SELECT ic.PCSTABBR AS state, AVG(gr.LINE_55) AS avg_completed
+FROM ipedsdata.gr2022_l2_rv gr
+JOIN ipedsdata.ic2022campuses ic ON gr.UNITID = ic.UNITID
+GROUP BY ic.PCSTABBR
+ORDER BY avg_completed DESC;",,Complex,,,,,,,,,Shubh,,,,,,
+7,What is the total adjusted cohort grouped by sector and state?,"GR2022_l2_rv, HD_2022_rv, IC_2022_Campuses","Table Names:
+
+gr2022_l2_rv
+
+hd_2022_rv
+
+ic_2022_campuses
+Column Names:
+
+UNITID
+
+LINE_50
+
+SECTOR
+
+PCSTABBR
+Encoded Values:
+
+No encoded values were found in the provided context.","SELECT hd.SECTOR, ic.PCSTABBR AS state, SUM(gr.LINE_50) AS total_adjusted
+FROM ipedsdata.gr2022_l2_rv gr
+JOIN ipedsdata.ic2022campuses ic ON gr.UNITID = ic.UNITID
+JOIN ipedsdata.hd2022 hd ON gr.UNITID = hd.UNITID
+GROUP BY hd.SECTOR, ic.PCSTABBR
+ORDER BY total_adjusted DESC;",,Complex,,,,,,,,,Shubh,,,,,,
+8,"Which institutions have the highest number of students graduating on time, ranked within each control type (public/private)?","GR2022_l2_rv, IC_2022_Campuses","Table Names:
+
+gr2022_l2_rv
+
+ic_2022_campuses
+Column Names:
+
+UNITID
+
+LINE_55
+
+PCINSTNM
+
+PCCONTROL
+Encoded Values:
+
+No encoded values were found in the provided context.","SELECT ic.PCCONTROL AS control_type,
+       ic.PCINSTNM AS institution_name,
+       gr.LINE_55 AS graduation_count,
+       RANK() OVER (
+         PARTITION BY ic.PCCONTROL
+         ORDER BY gr.LINE_55 DESC
+       ) AS rank_within_control
+FROM ipedsdata.gr2022_l2_rv gr
+JOIN ipedsdata.ic2022campuses ic ON gr.UNITID = ic.UNITID;",,Complex,,,,,,,,,Shubh,,,,,,
+9,Show me the top 10 institutions where the most students finished their degrees on time.,"GR2022_l2_rv, HD_2022_rv, IC_2022_Campuses","Table Names:
+
+gr2022_l2_rv
+
+hd_2022_rv
+Column Names:
+
+UNITID
+
+LINE_55
+
+LINE_50
+
+INSTNM
+Encoded Values:
+
+No encoded values were found in the provided context.","SELECT hd.INSTNM AS institution_name,
+       gr.LINE_55 AS completed_on_time,
+       gr.LINE_50 AS adjusted_cohort
+FROM ipedsdata.gr2022_l2_rv gr
+JOIN ipedsdata.hd2022 hd ON gr.UNITID = hd.UNITID
+WHERE gr.LINE_55 IS NOT NULL AND gr.LINE_50 IS NOT NULL
+ORDER BY gr.LINE_55 DESC
+LIMIT 10;
+
+",,Complex,,,,,,,,,Shubh,,,,,,
+10,How many institutions are included in the GR200 survey?,gr200_22_rv,"Table Names:
+1. gr200_22_rv
+
+Column Names:
+1. unitid
+
+Encoded Values:
+- No encoded values were found in the provided context.",SELECT COUNT(DISTINCT unitid) FROM ipedsdata.gr200_22_rv;,,Simple,,,,,,,,,Keerthika,,,,,,
+11,How many students completed their bachelor's degree within twice the expected time?,gr200_22_rv,"Table Names:
+1. gr200_22_rv
+
+Column Names:
+1. BAGR200
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT SUM(BAGR200) AS total_bachelor_200pct
+FROM ipedsdata.gr200_22_rv;",,Simple,,,,,,,,,,,,,,,
+12,"How many students finished shorter programs, like associate degrees or certificates, within twice the normal time?",gr200_22_rv,"Table Names:
+1. gr200_22_rv
+
+Column Names:
+1. LAGR200
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT SUM(L4GR200) AS total_l4_completers_200pct
+FROM ipedsdata.gr200_22_rv;",,Simple,,,,,,,,,,,,,,,
+13,"Which colleges or universities had more students graduating with a bachelor’s degree after taking twice the usual time, compared to those who finished in one and a half times the normal time?","gr200_22_rv,
+hd2022","Table Names:
+1. gr200_22_rv
+2. hd2022
+
+Column Names:
+1. INSTNM
+2. BAGR150
+3. BAGR200
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT hd.INSTNM, gr.BAGR150, gr.BAGR200
+FROM ipedsdata.gr200_22_rv gr
+JOIN ipedsdata.hd2022 hd ON gr.UNITID = hd.UNITID
+WHERE gr.BAGR200 > gr.BAGR150;",,Complex,,,,,,,,,,,,,,,
+14,"Which states, on average, had the most students finish their bachelor’s degree after taking up to twice as long as expected?","gr200_22_rv,
+hd2022","Table Names:
+1. gr200_22_rv
+2. hd2022
+
+Column Names:
+1. BAGR200
+2. STABBR
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT hd.STABBR, AVG(gr.BAGR200) AS avg_completion
+FROM ipedsdata.gr200_22_rv gr
+JOIN ipedsdata.hd2022 hd ON gr.UNITID = hd.UNITID
+WHERE gr.BAGR200 IS NOT NULL
+GROUP BY hd.STABBR
+ORDER BY avg_completion DESC;",,Complex,,,,,,,,,,,,,,,
+15,"Which colleges have a large number of enrolled students but relatively few who graduate, even after taking twice the usual time?","gr200_22_rv,
+hd2022,
+eff2022","Table Names:
+1. gr200_22_rv
+2. hd2022
+3. eff2022
+
+Column Names:
+1. INSTNM
+2. EFYTOTLT
+3. BAGR200
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT hd.INSTNM, eff.EFYTOTLT, gr.BAGR200
+FROM ipedsdata.gr200_22_rv gr
+JOIN ipedsdata.effy2022 eff ON gr.UNITID = eff.UNITID
+JOIN ipedsdata.hd2022 hd ON gr.UNITID = hd.UNITID
+WHERE eff.EFYTOTLT > 10000 AND gr.BAGR200 < 1000;",,Complex,,,,,,,,,,,,,,,
+16,"On average, how many students graduate with a bachelor’s degree (after taking longer) at public, private, or other types of colleges?","gr200_22_rv,
+hd2022","Table Names:
+1. gr200_22_rv
+2. hd2022
+
+Column Names:
+1. BAGR200
+2. CONTROL
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT hd.CONTROL, AVG(gr.BAGR200) AS avg_completers
+FROM ipedsdata.gr200_22_rv gr
+JOIN ipedsdata.hd2022 hd ON gr.UNITID = hd.UNITID
+GROUP BY hd.CONTROL;",,Complex,,,,,,,,,,,,,,,
+17,"How many students, in total, graduated late from each type of college (like public vs. private schools)?","gr200_22_rv,
+hd2022","Table Names:
+1. gr200_22_rv
+2. hd2022
+
+Column Names:
+1. BAGR200
+2. CONTROL
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT hd.CONTROL, SUM(gr.BAGR200) AS total_completers
+FROM ipedsdata.gr200_22_rv gr
+JOIN ipedsdata.hd2022 hd ON gr.UNITID = hd.UNITID
+GROUP BY hd.CONTROL;",,Complex,,,,,,,,,,,,,,,
+18,Which colleges had no students finish their bachelor’s degree even after taking twice as long as usual?,"gr200_22_rv,
+hd2022","Table Names:
+1. gr200_22_rv
+2. hd2022
+
+Column Names:
+1. INSTNM
+2. BAGR200
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT hd.INSTNM
+FROM ipedsdata.gr200_22_rv gr
+JOIN ipedsdata.hd2022 hd ON gr.UNITID = hd.UNITID
+WHERE gr.BAGR200 = 0;",,Simple,,,,,,,,,,,,,,,
+19,How much did the number of bachelor’s graduates increase when students were given more time — from 1.5 times to 2 times the normal program length?,"gr200_22_rv,
+hd2022","Table Names:
+1. gr200_22_rv
+2. hd2022
+
+Column Names:
+1. BAGR200
+2. BAGR150
+3. INSTNM
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT hd.INSTNM, gr.BAGR150, gr.BAGR200,
+       (gr.BAGR200 - gr.BAGR150) AS growth
+FROM ipedsdata.gr200_22_rv gr
+JOIN ipedsdata.hd2022 hd ON gr.UNITID = hd.UNITID
+WHERE gr.BAGR150 IS NOT NULL AND gr.BAGR200 > gr.BAGR150;",,Complex,,,,,,,,,,,,,,,
+20,"Which colleges had very low graduation success, with less than 10% of their students finishing even after taking extra time?","gr200_22_rv,
+hd2022,
+eff2022","Table Names:
+1. gr200_22_rv
+2. hd2022
+3. eff2022
+
+Column Names:
+1. INSTNM
+2. EFYTOTLT
+3. BAGR200
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT hd.INSTNM, eff.EFYTOTLT, gr.BAGR200,
+       CAST(gr.BAGR200 AS FLOAT) / NULLIF(eff.EFYTOTLT, 0) AS grad_ratio
+FROM ipedsdata.gr200_22_rv gr
+JOIN ipedsdata.effy2022 eff ON gr.UNITID = eff.UNITID
+JOIN ipedsdata.hd2022 hd ON gr.UNITID = hd.UNITID
+WHERE eff.EFYTOTLT > 0 AND gr.BAGR200 < 0.1 * eff.EFYTOTLT;",,,,,,,,,,,,,,,,,
+21,List institutions with more than 500 Pell Grant recipients.,"gr2022_pell_ssl_rv, hd2022","Table Names:
+1. gr2022_pell_ssl_rv 
+2. hd2022
+
+Column Names:
+1. UNITID
+2. PGREVCT
+3. INSTNM
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT 
+    hd.instnm, 
+    g.PGREVCT
+FROM ipedsdata.gr2022_pell_ssl_rv g
+JOIN ipedsdata.hd2022 hd 
+  ON g.unitid = hd.unitid
+WHERE g.PGREVCT > 500;
+",,Simple,,,,,,,,,SUMESH,,,,,,
+22,"Show the total number of institutions reporting Pell Grant data.
+
+
+",gr2022_pell_ssl_rv,"Table Names:
+1. gr2022_pell_ssl_rv
+
+Column Names:
+1. UNITID
+2. PGREVCT
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT COUNT(DISTINCT UNITID)
+FROM ipedsdata.gr2022_pell_ssl_rv
+WHERE PGREVCT IS NOT NULL;",,Simple,,,,,,,,,SUMESH,,,,,,
+23,Find institutions where no exclusions were reported for Pell Grant recipients.,"gr2022_pell_ssl_rv, hd2022","Table Names:
+1. gr2022_pell_ssl_rv 
+2. hd2022
+
+Column Names:
+1. UNITID
+2. PGEXCLU
+3. INSTNM
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT 
+    hd.instnm AS institution_name
+FROM ipedsdata.gr2022_pell_ssl_rv g
+JOIN ipedsdata.hd2022 hd 
+  ON g.unitid = hd.unitid
+WHERE g.pgexclu = 0;
+",,Simple,,,,,,,,,SUMESH,,,,,,
+24,Retrieve institutions where more than 300 Pell recipients earned bachelor's degrees.,"gr2022_pell_ssl_rv, hd2022","Table Names:
+1. gr2022_pell_ssl_rv 
+2. hd2022
+
+Column Names:
+1. UNITID
+2. PGEXCLU
+3. INSTNM
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT 
+    hd.instnm AS institution_name,
+    g.pgcmbac
+FROM ipedsdata.gr2022_pell_ssl_rv g
+JOIN ipedsdata.hd2022 hd 
+  ON g.unitid = hd.unitid
+WHERE g.pgcmbac > 300;",,Simple,,,,,,,,,SUMESH,,,,,,
+25,How many institutions have fewer than 50 Pell completions by locale?,"gr2022_pell_ssl_rv, ic2022campuses","Table Names:
+1. gr2022_pell_ssl_rv 
+2. ic2022campuses
+
+Column Names:
+1. UNITID
+2. PGCMTOT
+3. PCLOCALE
+
+Encoded Values:
+11 → City: Large
+12 → City: Midsize
+13 → City: Small
+21 → Suburb: Large
+22 → Suburb: Midsize
+23 → Suburb: Small
+31 → Town: Fringe
+32 → Town: Distant
+33 → Town: Remote
+41 → Rural: Fringe
+42 → Rural: Distant
+43 → Rural: Remote","SELECT 
+  CASE ic.pclocale
+    WHEN 11 THEN 'City: Large'
+    WHEN 12 THEN 'City: Midsize'
+    WHEN 13 THEN 'City: Small'
+    WHEN 21 THEN 'Suburb: Large'
+    WHEN 22 THEN 'Suburb: Midsize'
+    WHEN 23 THEN 'Suburb: Small'
+    WHEN 31 THEN 'Town: Fringe'
+    WHEN 32 THEN 'Town: Distant'
+    WHEN 33 THEN 'Town: Remote'
+    WHEN 41 THEN 'Rural: Fringe'
+    WHEN 42 THEN 'Rural: Distant'
+    WHEN 43 THEN 'Rural: Remote'
+    ELSE 'Unknown'
+  END AS locale_description,
+  COUNT(*) AS num_low_pell_completions
+FROM ipedsdata.gr2022_pell_ssl_rv AS gr
+JOIN ipedsdata.ic2022campuses AS ic
+  ON gr.unitid = ic.unitid
+WHERE gr.pgcmtot < 50
+GROUP BY ic.pclocale
+ORDER BY num_low_pell_completions DESC;
+",,Intermediate,,,,,,,,,SUMESH,,,,,,
+26,how many students completed their programs with Direct Subsidized Loans at each institution.,"gr2022_pell_ssl_rv, hd2022","Table Names:
+1. gr2022_pell_ssl_rv 
+2. hd2022
+
+Column Names:
+1. UNITID
+2. SSCMTOT
+3. INSTNM
+
+Encoded Values:
+No encoded values were found in the provided context.","SELECT 
+  hd.instnm AS institution_name,
+  gr.sscmtot AS ssl_completions
+FROM ipedsdata.gr2022_pell_ssl_rv AS gr
+JOIN ipedsdata.hd2022 AS hd
+  ON gr.unitid = hd.unitid;
+
+",,,,,,,,,,,SUMESH,,,,,,
+27,how many students completed their programs with Pell Grants,gr2022_pell_ssl_rv,"Table Names:
+1. gr2022_pell_ssl_rv
+
+Column Names:
+1. UNITID
+2. PGCMTOT
+
+Encoded Values:
+- No encoded values were found in the provided context.
+","SELECT 
+  SUM(pgcmtot) AS total_pell_completions
+FROM ipedsdata.gr2022_pell_ssl_rv;",,Intermediate,,,,,,,,,SUMESH,,,,,,
+28,Find institutions where more students completed 'Other' degrees than Bachelor's.,"gr2022_pell_ssl_rv, hd2022","Table Names:
+1. gr2022_pell_ssl_rv 
+2. hd2022
+
+Column Names:
+1. UNITID
+2. PGCMBAC
+3. PGCMOBA
+4. INSTNM
+
+Encoded Values:
+No encoded values were found in the provided context.","SELECT 
+  hd.instnm AS institution_name,
+  gr.pgcmoba AS other_degree_completions,
+  gr.pgcmbac AS bachelors_degree_completions
+FROM ipedsdata.gr2022_pell_ssl_rv AS gr
+JOIN ipedsdata.hd2022 AS hd
+  ON gr.unitid = hd.unitid
+WHERE gr.pgcmoba > gr.pgcmbac;
+",,Intermediate,,,,,,,,,SUMESH,,,,,,
+29,Get institutions where adjusted cohort is less than 90% of the revised cohort (Pell).,"gr2022_pell_ssl_rv, hd2022","Table Names:
+1. gr2022_pell_ssl_rv 
+2. hd2022
+
+Column Names:
+1. UNITID
+2. PGADJCT
+3. PGREVCT
+4. INSTNM
+
+Encoded Values:
+No encoded values were found in the provided context.","SELECT 
+  hd.instnm AS institution_name,
+  gr.pgadjct AS adjusted_cohort,
+  gr.pgrevct AS revised_cohort
+FROM ipedsdata.gr2022_pell_ssl_rv AS gr
+JOIN ipedsdata.hd2022 AS hd
+  ON gr.unitid = hd.unitid
+WHERE gr.pgadjct < gr.pgrevct * 0.9;",,Intermediate,,,,,,,,,SUMESH,,,,,,
+30,Find institutions where at least 80% of adjusted Pell cohort completed a degree.,"gr2022_pell_ssl_rv, hd2022","Table Names:
+1. gr2022_pell_ssl_rv 
+2. hd2022
+
+Column Names:
+1. UNITID
+2. PGADJCT
+3. PGCMTOT
+4. INSTNM
+
+Encoded Values:
+No encoded values were found in the provided context.","SELECT 
+  hd.instnm AS institution_name,
+  gr.pgcmtot AS pell_completions,
+  gr.pgadjct AS adjusted_cohort,
+  ROUND(gr.pgcmtot * 1.0 / gr.pgadjct, 2) AS completion_rate
+FROM ipedsdata.gr2022_pell_ssl_rv AS gr
+JOIN ipedsdata.hd2022 AS hd
+  ON gr.unitid = hd.unitid
+WHERE gr.pgadjct > 0
+  AND gr.pgcmtot * 1.0 / gr.pgadjct >= 0.80;",,Intermediate,,,,,,,,,SUMESH,,,,,,
+31,"At each college, how many loan students were taken out of the group before checking who graduated?","gr2022_pell_ssl_rv, hd2022","Table Names:
+1. gr2022_pell_ssl_rv 
+2. hd2022
+
+Column Names:
+1. UNITID
+2. SSEXCLU
+3. SSREVCT
+4. INSTNM
+
+Encoded Values:
+No encoded values were found in the provided context.","SELECT 
+  hd.instnm AS institution_name,
+  gr.ssexclu AS excluded_ssl_students,
+  gr.ssrevct AS total_ssl_group,
+  ROUND(gr.ssexclu * 1.0 / gr.ssrevct, 2) AS exclusion_rate
+FROM ipedsdata.gr2022_pell_ssl_rv AS gr
+JOIN ipedsdata.hd2022 AS hd
+  ON gr.unitid = hd.unitid
+WHERE gr.ssrevct > 0;",,Intermediate,,,,,,,,,SUMESH,,,,,,
+32,Find names of institutions with highest Pell Grant completion rates.,"gr2022_pell_ssl_rv, hd2022","Table Names:
+1. gr2022_pell_ssl_rv
+2. hd2022
+
+Column Names:
+1. UNITID
+2. PGCMTOT
+3. PGADJCT
+4. INSTNM
+
+Encoded Values:
+- No encoded values were found in the provided context.
+","SELECT hd.instnm, g.PGCMTOT * 1.0 / g.PGADJCT AS completion_rate
+FROM ipedsdata.gr2022_pell_ssl_rv g
+JOIN ipedsdata.hd2022 hd ON g.UNITID = hd.unitid
+WHERE g.PGADJCT > 0
+ORDER BY completion_rate DESC
+LIMIT 10;
+",,Complex,,,,,,,,,SUMESH,,,,,,
+33,Find public universities in California with >70% Pell completion.,"gr2022_pell_ssl_rv, hd2022","Table Names:
+1. gr2022_pell_ssl_rv
+2. hd2022
+
+Column Names:
+1. UNITID
+2. PGCMTOT
+3. PGADJCT
+4. INSTNM
+5. STABBR
+6. SECTOR
+
+Encoded Values:
+- SECTOR = 1 for Public 4-year institutions","SELECT hd.instnm, g.PGCMTOT * 1.0 / g.PGADJCT AS rate
+FROM ipedsdata.gr2022_pell_ssl_rv g
+JOIN ipedsdata.hd2022 hd ON g.UNITID = hd.unitid
+WHERE hd.stabbr = 'CA'
+  AND hd.sector = 1
+  AND g.PGADJCT > 0
+  AND g.PGCMTOT * 1.0 / g.PGADJCT > 0.70;",,Complex,,,,,,,,,SUMESH,,,,,,
+34,Get average Pell completion rate by state.,"gr2022_pell_ssl_rv, hd2022","Table Names:
+1. gr2022_pell_ssl_rv
+2. hd2022
+
+Column Names:
+1. UNITID
+2. PGCMTOT
+3. PGADJCT
+4. STABBR
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT hd.stabbr, AVG(g.PGCMTOT * 1.0 / g.PGADJCT) AS avg_completion
+FROM ipedsdata.gr2022_pell_ssl_rv g
+JOIN ipedsdata.hd2022 hd ON g.UNITID = hd.unitid
+WHERE g.PGADJCT > 0
+GROUP BY hd.stabbr;",,Complex,,,,,,,,,SUMESH,,,,,,
+35,"In each state, how many students with government loans were counted to track graduation?","gr2022_pell_ssl_rv , ic2022campuses","Table Names:
+1. gr2022_pell_ssl_rv 
+2. ic2022campuses
+
+Column Names:
+1. UNITID
+2. SSADJCT
+3. PCSTABBR
+
+Encoded Values:
+No encoded values were found in the provided context.","SELECT 
+  ic.pcstabbr  AS state,
+  SUM(gr.ssadjct) AS total_adjusted_subsidized_cohort
+FROM ipedsdata.gr2022_pell_ssl_rv AS gr
+JOIN ipedsdata.ic2022campuses    AS ic
+  ON gr.unitid = ic.unitid
+GROUP BY ic.pcstabbr;",,,,,,,,,,,SUMESH,,,,,,
+36,Compare average total Subsidized completions between for-profit and not-for-profit privates.,"gr2022_pell_ssl_rv , ic2022campuses","Table Names:
+1. gr2022_pell_ssl_rv 
+2. ic2022campuses
+
+Column Names:
+1. UNITID
+2. SSCMTOT
+3. PCCONTROL
+
+Encoded Values:
+1 → Public
+2 → Private Not-For-Profit
+3 → Private For-Profit","SELECT 
+  ic.pccontrol            AS control_code,
+  ROUND(AVG(gr.sscmtot),1) AS avg_ss_completions
+FROM ipedsdata.gr2022_pell_ssl_rv AS gr
+JOIN ipedsdata.ic2022campuses AS ic
+  ON gr.unitid = ic.unitid
+WHERE ic.pccontrol IN (2,3)   -- 2 = Private Not-For-Profit, 3 = Private For-Profit
+GROUP BY ic.pccontrol;",,,,,,,,,,,SUMESH,,,,,,
+37,How do the average Pell Grant cohort sizes compare between public institutions and private institutions?,"gr2022_pell_ssl_rv , ic2022campuses","Table Names:
+1. gr2022_pell_ssl_rv 
+2. ic2022campuses
+
+Column Names:
+1. UNITID
+2. PGREVCT
+3. PCCONTROL
+
+Encoded Values:
+1 → Public
+2 → Private Not-For-Profit
+3 → Private For-Profit","SELECT 
+  ic.pccontrol      AS control_code,
+  ROUND(AVG(gr.pgrevct),1) AS avg_pell_revct
+FROM ipedsdata.gr2022_pell_ssl_rv AS gr
+JOIN ipedsdata.ic2022campuses   AS ic
+  ON gr.unitid = ic.unitid
+GROUP BY ic.pccontrol;
+",,,,,,,,,,,SUMESH,,,,,,
+38,Which five states have the highest average total Subsidized-loan completions?,"gr2022_pell_ssl_rv , ic2022campuses","Table Names:
+1. gr2022_pell_ssl_rv 
+2. ic2022campuses
+
+Column Names:
+1. UNITID
+2. SSCMTOT
+3. PCSTABBR
+
+Encoded Values:
+None","SELECT 
+  ic.pcstabbr                 AS state,
+  ROUND(AVG(gr.sscmtot),1)    AS avg_ss_completions
+FROM ipedsdata.gr2022_pell_ssl_rv AS gr
+JOIN ipedsdata.ic2022campuses    AS ic
+  ON gr.unitid = ic.unitid
+GROUP BY ic.pcstabbr
+ORDER BY avg_ss_completions DESC
+LIMIT 5;",,,,,,,,,,,SUMESH,,,,,,
+39,"Which criteria exclude non-aid students, and how is their adjusted cohort size calculated?",gr2022_pell_ssl_rv,"Table Names:
+1. gr2022_pell_ssl_rv 
+
+Column Names:
+1. UNITID
+2. NREXCLU
+3. NRADJCT
+4. NRREVCT
+
+Encoded Values:
+None","SELECT MIN(NRREVCT)   AS min_nonrecip,
+       MAX(NRREVCT)   AS max_nonrecip,
+       ROUND(AVG(NRREVCT),1) AS avg_nonrecip
+FROM ipedsdata.gr2022_pell_ssl_rv;
+",,,,,,,,,,,SUMESH,,,,,,
+40,Rank institutions by difference in completion rate between Pell and SSL groups.,"gr2022_pell_ssl_rv, hd2022","Table Names:
+1. gr2022_pell_ssl_rv
+2. hd2022
+
+Column Names:
+1. UNITID
+2. PGCMTOT
+3. PGADJCT
+4. SSCMTOT
+5. SSADJCT
+6. INSTNM
+
+Encoded Values:
+- No encoded values were found in the provided context.","SELECT hd.instnm, 
+       g.PGCMTOT * 1.0 / g.PGADJCT AS pell_rate,
+       g.SSCMTOT * 1.0 / g.SSADJCT AS ssl_rate,
+       (g.PGCMTOT * 1.0 / g.PGADJCT - g.SSCMTOT * 1.0 / g.SSADJCT) AS rate_diff
+FROM ipedsdata.gr2022_pell_ssl_rv g
+JOIN ipedsdata.hd2022 hd ON g.UNITID = hd.unitid
+WHERE g.PGADJCT > 0 AND g.SSADJCT > 0
+ORDER BY rate_diff DESC;",,Complex,,,,,,,,,SUMESH,,,,,,
+35,What is the 4 year graduation rate for bachelor's degrees,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+BAGR100",SELECT AVG(BAGR100) AS avg_rate FROM ipedsdata.gr200_22,,simple,,,,,,,,,thien huong,,,,,,
+36,What is the 6 year graduation rate for bachelor's degree,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+BAGR150",SELECT AVG(BAGR150) AS avg_rate FROM ipedsdata.gr200_22,,simple,,,,,,,,,thien huong,,,,,,
+37,What is the 8 year graduation rate for bachelor's degrees,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+BAGR200",SELECT AVG(BAGR200) AS avg_rate FROM ipedsdata.gr200_22,,simple,,,,,,,,,thien huong,,,,,,
+38,What is the 4 year graduation rate for associate/certificate programs,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+L4GR100",SELECT AVG(L4GR100) AS avg_rate FROM ipedsdata.gr200_22,,simple,,,,,,,,,thien huong,,,,,,
+39,What is the 6 year graduation rate for associate/certificate programs,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+L4GR150",SELECT AVG(L4GR150) AS avg_rate FROM ipedsdata.gr200_22,,simple,,,,,,,,,thien huong,,,,,,
+40,What is the 8 year graduation rate for associate/certificate programs,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+L4GR200",SELECT AVG(L4GR200) AS avg_rate FROM ipedsdata.gr200_22,,simple,,,,,,,,,thien huong,,,,,,
+41,How many bachelor's students are still enrolled after 8 years?,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+BASTEND",SELECT SUM(BASTEND) as total_num FROM ipedsdata.gr200_22,,simple,,,,,,,,,thien huong,,,,,,
+42,What is the percentage of bachelor's students still enrolled after 8 years?,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+BASTEND, BAREVCT","SELECT 
+ SUM(BASTEND) as total_still_enrolled,
+ SUM(BAREVCT) as total_original_cohort,
+ (SUM(BASTEND) *100.0)/SUM(BAREVCT) as still_enrolled_rate
+ FROM ipedsdata.gr200_22",,intermediate,,,,,,,,,thien huong,,,,,,
+43,How many associate student are still enrolled after 4 years?,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+L4STEND",SELECT SUM(L4STEND) as total_num FROM ipedsdata.gr200_22,,simple,,,,,,,,,thien huong,,,,,,
+44,What is the percentage of bachelor's students still enrolled after 4 years?,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+L4STEND, L4REVCT","SELECT 
+SUM(L4STEND) as total_still_enrolled,
+SUM(L4REVCT) as total_original_cohort,
+(SUM(L4STEND) *100.0)/SUM(L4REVCT) as still_enrolled_rate
+FROM ipedsdata.gr200_22
+",,intermediate,,,,,,,,,thien huong,,,,,,
+45,What are top 10 instituition with highest bachelor graduation rate?,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+UNITID, BAGR100","SELECT UNITID, BAGR100 FROM ipedsdata.gr200_22 
+WHERE BAGR100 NOT NULL
+ORDER BY BAGR100 DESC
+LIMIT(10);",,intermediate,,,,,,,,,thien huong,,,,,,
+46,What are top 10 instituition with highest associate/certificate graduation rate?,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+UNITID, L4GR100","SELECT UNITID, L4GR100 FROM ipedsdata.gr200_22 
+WHERE L4GR100 NOT NULL
+ORDER BY L4GR100 DESC
+LIMIT(10);",,intermediate,,,,,,,,,thien huong,,,,,,
+47,Which institution has the highest graduation rate?,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+BAGR100, UNITID","SELECT UNITID, BAGR100 FROM ipedsdata.gr200_22 
+WHERE BAGR100 = (SELECT MAX(BAGR100) FROM ipedsdata.gr200_22);",,,,,,,,,,,thien huong,,,,,,
+48,Find schools with over 70% completion rates,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+UNITID, BAGR100","SELECT UNITID, BAGR100 FROM ipedsdata.gr200_22 
+WHERE BAGR100 > 70;",,,,,,,,,,,thien huong,,,,,,
+49,What school has the most students still enrolled?,gr200_22,"table names
+1. gr200_22
+
+Columns Names:
+BASTEND, UNITID","SELECT UNITID, BASTEND FROM ipedsdata.gr200_22 
+WHERE BASTEND = (SELECT MAX(BASTEND) FROM ipedsdata.gr200_22);",,,,,,,,,,,thien huong,,,,,,
+50,what is the Average net position grouped by institution size,"ipeds_finance_data1
+di557a","table name 
+ipeds_finance_data1
+di557a
+
+
+Columns Names:
+F1A01","SELECT 
+    CASE 
+        WHEN fin.""F1A01"" < 50000000 THEN 'Small'
+        WHEN fin.""F1A01"" BETWEEN 50000000 AND 500000000 THEN 'Medium'
+        ELSE 'Large'
+    END AS size_category,
+    AVG(fin.""F1N07"") AS avg_net_position,
+    meta.vartitle AS net_position_description
+FROM ipedsdata.ipeds_finance_data1 fin
+JOIN ipedsdata.di557a meta ON meta.varname = 'F1N07'
+GROUP BY size_category, meta.vartitle; ",,intermediate,,,,,,,,,thien huong,,,,,,
+51,"What is the average net position  of institutions grouped by their size based on total current assets , and what does the net position variable represent","ipeds_finance_data1
+di557a","table name 
+ipeds_finance_data1
+di557a
+
+
+Columns Names:
+F1A01,F1N07","SELECT 
+    CASE 
+        WHEN fin.""F1A01"" < 50000000 THEN 'Small'
+        WHEN fin.""F1A01"" BETWEEN 50000000 AND 500000000 THEN 'Medium'
+        ELSE 'Large'
+    END AS size_category,
+    AVG(fin.""F1N07"") AS avg_net_position,
+    meta.vartitle AS net_position_description
+FROM ipedsdata.ipeds_finance_data1 fin
+JOIN ipedsdata.di557a meta 
+  ON meta.varname = 'F1N07'
+GROUP BY size_category, meta.vartitle;
+",,intermediate,,,,,,,,,Deeksha,,,,,,
+52,Can you tell me institutions where assets are greater than liabilities,"ipeds_finance_data1
+di557a",,"SELECT 
+    fin.""UNITID"", 
+    fin.""F1A01"" AS total_assets, 
+    fin.""F1A04"" AS total_liabilities,
+    a_meta.vartitle AS asset_description,
+    l_meta.vartitle AS liability_description
+FROM ipedsdata.ipeds_finance_data1 fin
+JOIN ipedsdata.di557a a_meta ON a_meta.varname = 'F1A01'
+JOIN ipedsdata.di557a l_meta ON l_meta.varname = 'F1A04'
+WHERE fin.""F1A01"" > fin.""F1A04"";
+",,intermediate,,,,,,,,,Deeksha,,,,,,
+,can you tell Average net position grouped by institution size,"ipeds_finance_data1|
+di557a","table name 
+ipeds_finance_data1
+di557a
+
+
+Columns Names:
+F1A01,F1N07","SELECT 
+    CASE 
+        WHEN fin.""F1A01"" < 50000000 THEN 'Small'
+        WHEN fin.""F1A01"" BETWEEN 50000000 AND 500000000 THEN 'Medium'
+        ELSE 'Large'
+    END AS size_category,
+    AVG(fin.""F1N07"") AS avg_net_position,
+    meta.vartitle AS net_position_description
+FROM ipedsdata.ipeds_finance_data1 fin
+JOIN ipedsdata.di557a meta ON meta.varname = 'F1N07'
+GROUP BY size_category, meta.vartitle;
+",,intermediate,,,,,,,,,Deeksha,,,,,,
+,what is the Percentage of institutions with zero current assets,"ipeds_finance_data1
+di557a","table name 
+ipeds_finance_data1
+di557a
+
+
+Columns Names:
+F1A01,F1N07","SELECT 
+    ROUND(
+        COUNT(*) FILTER (WHERE fin.""F1A01"" = 0) * 100.0 / NULLIF(COUNT(*), 0), 
+        2
+    ) AS percent_zero_assets,
+    meta.vartitle AS asset_description
+FROM ipedsdata.ipeds_finance_data1 fin
+JOIN ipedsdata.di557a meta 
+  ON meta.varname = 'F1A01'
+GROUP BY meta.vartitle;
+",,intermediate,,,,,,,,,Deeksha,,,,,,
+, what are the highest net position,"ipeds_finance_data1
+di557a","table name 
+ipeds_finance_data1
+di557a
+
+
+Columns Names:
+F1A01,F1N07","SELECT 
+    fin.""UNITID"", 
+    fin.""F1N07"" AS net_position,
+    meta.vartitle
+FROM ipedsdata.ipeds_finance_data1 fin
+JOIN ipedsdata.di557a meta ON meta.varname = 'F1N07'
+ORDER BY fin.""F1N07"" DESC
+LIMIT 5;
+",,intermediate,,,,,,,,,Deeksha,,,,,,
+,"What is the population standard deviation of total current liabilities, and what does the variables represent?","ipeds_finance_data1
+di557a","table name 
+ipeds_finance_data1
+di557a
+
+
+Columns Names:
+F1A01,F1N04","SELECT 
+    STDDEV_POP(fin.""F1A04"") AS stddev_liabilities,
+    meta.vartitle
+FROM ipedsdata.ipeds_finance_data1 fin
+JOIN ipedsdata.di557a meta 
+  ON meta.varname = 'F1A04'
+GROUP BY meta.vartitle;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,what are the Institutions with negative net assets,"ipeds_finance_data1
+di557a","table name 
+ipeds_finance_data1
+di557a
+
+
+Columns Names:
+F1A03","SELECT 
+    fin.""F1N03"" AS net_assets,
+    meta.vartitle
+FROM ipedsdata.ipeds_finance_data1 fin
+JOIN ipedsdata.di557a meta ON meta.varname = 'F1N03'
+WHERE fin.""F1N03"" < 0;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,what are Variable descriptions and frequencies ,"ipeds_finance_data1
+di557a",,"SELECT 
+    meta.varname,
+    meta.vartitle,
+    meta.frequency,
+    meta.percent
+FROM ipedsdata.di557a meta
+WHERE meta.varname LIKE 'F1A%';
+",,intermediate,,,,,,,,,Deeksha,,,,,,
+,what are Top 10 surplus-generating institutions (Net Assets - Liabilities),"ipeds_finance_data1
+di557a","table name 
+ipeds_finance_data1
+di557a
+
+
+Columns Names:
+F1A03","SELECT 
+    (fin.""F1N03"" - fin.""F1N05"") AS surplus,
+    net_meta.vartitle AS net_assets_desc,
+    liab_meta.vartitle AS liability_desc
+FROM ipedsdata.ipeds_finance_data1 fin
+JOIN ipedsdata.di557a net_meta ON net_meta.varname = 'F1N03'
+JOIN ipedsdata.di557a liab_meta ON liab_meta.varname = 'F1N05'
+ORDER BY surplus DESC
+LIMIT 10;",,intermediate,,,,,,,,,Deeksha,,,,,,
+60,What are the top 10 institutions by total revenue?,ipeds_finance_data1,,"SELECT ""UNITID"", ""F1B25""
+ FROM ipedsdata.ipeds_finance_data1
+ ORDER BY ""F1B25""
+ DESC LIMIT 10;",,intermediate,,,,,,,,,Deeksha,,,,,,
+61,Which institutions received federal grants?,ipeds_finance_data1,,"SELECT ""UNITID"", ""F1B02"" FROM ipedsdata.ipeds_finance_data1 WHERE ""F1B02"" > 0;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,How much did each school spend on scholarships?,ipeds_finance_data1,"table name 
+ipeds_finance_data1
+di557a
+
+
+Columns Names:
+F1C101","SELECT  ""F1C101"" AS ""Scholarship_Expenses"" FROM ipedsdata.ipeds_finance_data1;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,What’s the average tuition revenue across all schools?,ipeds_finance_data1,"table name 
+ipeds_finance_data1
+di557a
+
+
+Columns Names:
+F1B01","SELECT AVG(""F1B01"") AS ""Avg_Tuition"" FROM ipedsdata.ipeds_finance_data1;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,List schools with negative net position change.,ipeds_finance_data1,,"SELECT ""UNITID"" FROM ipedsdata.ipeds_finance_data1 WHERE ""F1D03"" < 0;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,What is the total operating expense for each school?,ipeds_finance_data1,,"SELECT ""UNITID"", ""F1C191"" FROM ipedsdata.ipeds_finance_data1;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,Who reported hospital services revenue?,ipeds_finance_data1,,"SELECT ""UNITID"", ""F1B06""
+ FROM ipedsdata.ipeds_finance_data1 
+WHERE ""F1B06"" > 0;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,Show unrestricted net positions.,ipeds_finance_data1,,"SELECT ""UNITID"", ""F1A17"" AS ""Unrestricted_Net_Position"" 
+FROM ipedsdata.ipeds_finance_data1;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,Which schools had local grants?,ipeds_finance_data1,,"SELECT ""UNITID"", ""F1B04A"" FROM ipedsdata.ipeds_finance_data1 
+WHERE ""F1B04A"" > 0;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,Find schools with no reported endowment.,ipeds_finance_data1,,"SELECT ""UNITID"" FROM ipedsdata.ipeds_finance_data1 
+WHERE ""F1FHA"" = 2;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,What is the value of total liabilities?,ipeds_finance_data1,,"SELECT ""UNITID"", ""F1A13"" AS ""Total_Liabilities"" FROM ipedsdata.ipeds_finance_data1;",,intermediate,,,,,,,,,Deeksha,,,,,,
+, can you Compare average unrestricted vs restricted net assets across institutions.,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+F2A05B,F2A05","SELECT 
+    AVG(data.""F2A05B"") AS avg_unrestricted_net_assets,
+    AVG(data.""F2A05"") AS avg_restricted_net_assets
+FROM ipedsdata.ipeds_finance_f2_data data;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,What is the total value of investments for institutions with assets > $100 million?,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+F2A01","SELECT 
+    SUM(data.""F2A01"") AS total_investment_high_asset_institutions
+FROM ipedsdata.ipeds_finance_f2_data data
+WHERE data.""F2A02"" > 100000000;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,"Which financial variable has the highest number of missing values?
+","ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+varname,varTitle","SELECT 
+    var.varname, 
+    var.""varTitle"",
+    COUNT(DISTINCT data.""UNITID"") AS institutions_reporting
+FROM ipedsdata.ipeds_finance_f2_data data
+JOIN ipedsdata.ipeds_finance_f2 var ON var.varname = 'F2A01'
+GROUP BY var.varname, var.""varTitle""
+HAVING COUNT(DISTINCT data.""UNITID"") > 100;
+",,intermediate,,,,,,,,,Deeksha,,,,,,
+,What are the values for restricted net assets  for each institution?,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+F2A01","SELECT 
+    AVG(data.""F2A01"") AS avg_long_term_investments
+FROM ipedsdata.ipeds_finance_f2_data data;
+",,intermediate,,,,,,,,,Deeksha,,,,,,
+,"Which financial variable has the highest number of missing values?
+","ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+F2I07","SELECT  ""F2I07"" FROM ipedsdata.ipeds_finance_f2_data WHERE ""F2I07"" < 0;",,simple,,,,,,,,,Deeksha,,,,,,
+,What is the average value of long-term investments across all institutions?,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+F2A01","SELECT DISTINCT ""codevalue"", ""frequency""
+ FROM ipedsdata.ipeds_finance_f2
+ WHERE ""varname"" = 'F2A01';",,simple,,,,,,,,,Deeksha,,,,,,
+,How many institutions reported coodevalue R?,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+frequency,varname","SELECT ""frequency"" FROM ipedsdata.ipeds_finance_f2
+ WHERE ""varname"" = 'F2A19' AND ""codevalue"" = 'R';",,simple,,,,,,,,,Deeksha,,,,,,
+,What is the standard deviation of restricted net assets,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+F2A05","SELECT 
+    STDDEV_POP(data.""F2A05"") AS stddev_restricted_net_assets
+FROM ipedsdata.ipeds_finance_f2_data data;",,simple,,,,,,,,,Deeksha,,,,,,
+,What percentage of institutions reported zero for endowment assets ?,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+F2A19","SELECT 
+    ROUND(
+        COUNT(*) FILTER (WHERE data.""F2A19"" = 0) * 100.0 / NULLIF(COUNT(*), 0), 2
+    ) AS percent_zero_endowment_assets
+FROM ipedsdata.ipeds_finance_f2_data data;",,intermediate,,,,,,,,,Deeksha,,,,,,
+,Which institutions have accumulated depreciationgreater than $25M?,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data",,"SELECT ""UNITID"", ""F2A06"" FROM ipedsdata.ipeds_finance_f2_data
+ WHERE ""F2A06"" > 25000000;",,simple,,,,,,,,,Deeksha,,,,,,
+,How many institutions have valid data (code R) ?,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+F2A01","SELECT COUNT(*) FROM ipedsdata.ipeds_finance_f2
+ WHERE ""varname"" = 'F2A01' 
+AND ""codevalue"" = 'R';",,simple,,,,,,,,,Deeksha,,,,,,
+,List all variable names with fieldwidth more than 10.,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+varname","SELECT ""varname"", ""Fieldwidth"" FROM ipedsdata.ipeds_finance_f2 
+WHERE ""Fieldwidth"" > 10;",,simple,,,,,,,,,Deeksha,,,,,,
+,Show all data types used in the finance metadata table.,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+DataType","SELECT DISTINCT ""DataType"" FROM ipedsdata.ipeds_finance_f2;",,simple,,,,,,,,,Deeksha,,,,,,
+,Get average value of net assets invested in capital assets .,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+F2I04","SELECT AVG(""F2I04"") AS avg_invested_net_assets
+ FROM ipedsdata.ipeds_finance_f2_data;",,simple,,,,,,,,,Deeksha,,,,,,
+,What’s the total number of institutions with values ?,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+F2I06","SELECT COUNT(*) FROM ipedsdata.ipeds_finance_f2_data
+ WHERE ""F2I06"" IS NOT NULL;",,simple,,,,,,,,,Deeksha,,,,,,
+,What’s the maximum value reported for unrestricted net assets ?,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+F2I07","SELECT MAX(""F2I07"") AS max_unrestricted_assets
+ FROM ipedsdata.ipeds_finance_f2_data;",,simple,,,,,,,,,Deeksha,,,,,,
+,List all variables where format is 'Cont'.,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+varname","SELECT DISTINCT ""varname"" 
+FROM ipedsdata.ipeds_finance_f2 WHERE ""format"" = 'Cont';",,simple,,,,,,,,,Deeksha,,,,,,
+,What does the variablerepresent?,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+varTitle","SELECT DISTINCT ""varTitle""
+ FROM ipedsdata.ipeds_finance_f2 
+WHERE ""varname"" = 'F2I03';",,simple,,,,,,,,,Deeksha,,,,,,
+,Get institutions with missing values,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+F2A01","SELECT ""UNITID"" FROM ipedsdata.ipeds_finance_f2_data 
+WHERE ""F2I05"" IS NULL;",,,,,,,,,,,Deeksha,,,,,,
+,Which variables have the imputation variable ?,"ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data","table name 
+ipedsdata.ipeds_finance_f2
+ipedsdata.ipeds_finance_f2_data
+
+Columns Names:
+varname","SELECT DISTINCT ""varname"" FROM ipedsdata.ipeds_finance_f2 
+WHERE ""imputationvar"" = 'XF2A01';",,simple,,,,,,,,,Deeksha,,,,,,
+,How much are the total assets for all institutions combined?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3A01",SELECT SUM(F3A01) AS total_assets FROM ipedsdata.f2122_f3_data;,,,,,,,,,,,thien huong,,,,,,
+,How much do all institutions owe in liabilities?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3A02",SELECT SUM(F3A02) AS total_liabilities FROM ipedsdata.f2122_f3_data;,,,,,,,,,,,thien huong,,,,,,
+,What is the total equity for all institutions combined?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3A03",SELECT SUM(F3A03) AS Total_Combined_Equity FROM ipedsdata.f2122_f3_data WHERE F3A03 IS NOT NULL;,,,,,,,,,,,thien huong,,,,,,
+,How much total revenue do all institutions report?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3A09",SELECT SUM(F3D09) AS Total_Combined_Revenue FROM ipedsdata.f2122_f3_data WHERE F3D09 IS NOT NULL;,,,,,,,,,,,thien huong,,,,,,
+,How much do all institutions receive from federal grants?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3D02B",SELECT SUM(F3D02B) AS Total_Federal_Grants_and_Contracts FROM ipedsdata.f2122_f3_data WHERE F3D02B IS NOT NULL;,,,,,,,,,,,thien huong,,,,,,
+,How much do all institutions earn from investments?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3AD05","SELECT 
+  SUM(F3D05) AS Total_Investment_Income
+ FROM 
+  ipedsdata.f2122_f3_data
+ WHERE 
+  F3D05 IS NOT NULL;",,simple,,,,,,,,,thien huong,,,,,,
+,What is the total spending on research across all institutions?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3E02A1","SELECT 
+  SUM(F3E02A1) AS Total_Research_Expenditure
+ FROM 
+  ipedsdata.f2122_f3_data
+ WHERE 
+  F3E02A1 IS NOT NULL;",,simple,,,,,,,,,thien huong,,,,,,
+,What is the total amount spent on instruction by all institutions?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3E011","SELECT 
+  SUM(F3E011) AS Total_Instruction_Expenditure
+ FROM 
+  ipedsdata.f2122_f3_data
+ WHERE 
+  F3E011 IS NOT NULL;",,simple,,,,,,,,,thien huong,,,,,,
+,What is the total student service expenditure for all institutions?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3E03B1","SELECT 
+  SUM(F3E03B1) AS Total_Student_Service_Expenditure
+ FROM 
+  ipedsdata.f2122_f3_data
+ WHERE 
+  F3E03B1 IS NOT NULL;",,simple,,,,,,,,,thien huong,,,,,,
+,How much do institutions give in discounts for tuition fees?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3C06","SELECT 
+  SUM(F3C06) AS Total_Tuition_Fee_Discounts
+ FROM 
+  ipedsdata.f2122_f3_data
+ WHERE 
+  F3C06 IS NOT NULL;",,simple,,,,,,,,,thien huong,,,,,,
+,How much do institutions give in discounts for auxiliary services?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3C07","SELECT 
+  SUM(F3C07) AS Total_Auxiliary_Service_Discounts
+ FROM 
+  ipedsdata.f2122_f3_data
+ WHERE 
+  F3C07 IS NOT NULL;",,simple,,,,,,,,,thien huong,,,,,,
+,What is the total amount received by all institutions from Pell grants?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3C01","SELECT 
+  SUM(F3C01) AS Total_Pell_Grant_Funding
+ FROM 
+  ipedsdata.f2122_f3_data
+ WHERE 
+  F3C01 IS NOT NULL;",,simple,,,,,,,,,thien huong,,,,,,
+,What is the total amount received by all institutions from state grants?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3C03A","SELECT 
+  SUM(F3C03A) AS Total_State_Grant_Funding
+ FROM 
+  ipedsdata.f2122_f3_data
+ WHERE 
+  F3C03A IS NOT NULL;",,simple,,,,,,,,,thien huong,,,,,,
+,How do institutions with Pell grants compare to those without in terms of total assets?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3A01, F3C01","SELECT 
+  CASE 
+  WHEN F3C01 > 0 THEN 'With Pell Grants'
+  ELSE 'Without Pell Grants'
+  END AS Institution_Category,
+  COUNT(*) AS Number_of_Institutions,
+  SUM(F3A01) AS Total_Assets,
+  AVG(F3A01) AS Average_Assets_Per_Institution
+ FROM 
+  ipedsdata.f2122_f3_data
+ WHERE 
+  F3A01 IS NOT NULL
+ GROUP BY 
+  CASE 
+  WHEN F3C01 > 0 THEN 'With Pell Grants'
+  ELSE 'Without Pell Grants'
+  END
+ ORDER BY 
+  Institution_Category;",,complex,,,,,,,,,thien huong,,,,,,
+,How do institutions with Pell grants compare to those without in terms of total liabilities?,f2122_f3_data,"table names
+1. f2122_f3_data
+
+Columns Names:
+F3A02, F3C01","SELECT 
+  CASE
+  WHEN F3C01 > 0 THEN 'With Pell Grants'
+  ELSE 'Without Pell Grants'
+  END AS Institution_Category,
+  COUNT(*) AS Number_of_Institutions,
+  SUM(F3A02) AS Total_liabilities,
+  AVG(F3A02) AS avg_liabilities
+ FROM 
+  Ipedsdata.f2122_f3_data
+ WHERE
+  F3A02 IS NOT NULL
+ GROUP BY
+  CASE
+  WHEN F3C01 > 0 THEN 'With Pell Grants' 
+  ELSE 'Without Pell Grants'
+  END",,complex,,,,,,,,,thien huong,,,,,,
+,How does endowment wealth at private colleges relate to timely degree completion (4-year vs. 6-year graduation rates)?,"ipeds_finance_f2_data
+gr200_22_data",,"SELECT 
+  CASE 
+    WHEN f2.""F2H02""/1000000 < 10 THEN 'Small endowment (<$10M)'
+    WHEN f2.""F2H02""/1000000 BETWEEN 10 AND 100 THEN 'Medium endowment ($10M–$100M)'
+    ELSE 'Large endowment (>$100M)'
+  END AS endowment_category,
+  COUNT(*)                     AS num_institutions,
+  AVG(g.BAGR100)               AS avg_4yr_grad_rate,
+  AVG(g.BAGR150)               AS avg_6yr_grad_rate,
+  AVG(g.BAGR150 - g.BAGR100)   AS avg_4to6_increase
+FROM 
+  ipedsdata.ipeds_finance_f2_data AS f2
+JOIN 
+  ipedsdata.gr200_22_data       AS g
+    ON f2.""UNITID"" = g.unitid      
+WHERE 
+  f2.""F2H02""   > 0
+  AND g.BAGR100 > 0
+  AND g.BAGR150 > 0
+GROUP BY 
+  1        
+ORDER BY 
+  MIN(f2.""F2H02"");",,complex,,,,,,,,,,,,,,,
