@@ -110,62 +110,96 @@ chain = (
         | rephrase_query_results_runnable
 )
 
-from langchain.schema.runnable import Runnable
+#
+# from langchain.schema.runnable import Runnable
+#
+# class DebugStep(Runnable):
+#     def __init__(self, runnable, name):
+#         self.runnable = runnable
+#         self.name = name
+#
+#     def invoke(self, input, config=None):
+#         print(f"--- {self.name} INPUT ---")
+#         print(input)
+#         output = self.runnable.invoke(input, config=config)
+#         print(f"--- {self.name} OUTPUT ---")
+#         print(output)
+#
+#         # Return both original output and debug trace
+#         return {
+#             **(input if isinstance(input, dict) else {"input": input}),
+#             self.name: output
+#         }
+#
+# if __name__ == "__main__":
+#     chain_debug = (
+#             RunnableParallel({
+#                 "context": DebugStep(get_context_runnable, "get_context_runnable"),
+#                 "question": RunnablePassthrough(),
+#             })
+#             | DebugStep(create_final_prompt_runnable, "create_final_prompt_runnable")
+#             | DebugStep(generate_sql_llm_runnable, "generate_sql_llm_runnable")
+#             | DebugStep(get_query_results_runnable, "get_query_results_runnable")
+#             | DebugStep(rephrase_query_results_runnable, "rephrase_query_results_runnable")
+#     )
+#
+#     df = pd.read_csv("data/test_data/eval_data.csv")
+#     for row in df.iterrows():
+#         user_question  = row["Human Language"]
+#         results = chain_debug.invoke({"question": user_question})
+#         print("=== FINAL RESULT ===")
+#         print(results)
+#         # {
+#         #     "question": "Find all users who joined last week",
+#         #     "get_context_runnable": "...context output...",
+#         #     "create_final_prompt_runnable": "...final prompt...",
+#         #     "generate_sql_llm_runnable": "SELECT * FROM users WHERE ...",
+#         #     "get_query_results_runnable": "...query results...",
+#         #     "rephrase_query_results_runnable": "There are 12 users who joined last week."
+#         # }
+#
+#
+#         ## Evaluation Compare
+#         ## Ground true vs Predict
+#         if row["Table Name ( Main)"] == results["get_context_runnable"]["TABLE_NAME"]:
+#             pass
+#         if row["Expected SQL Query"] == results["generate_sql_llm_runnable"]:
+#             pass
+#             ## Calculate Accuracy
 
-class DebugStep(Runnable):
-    def __init__(self, runnable, name):
-        self.runnable = runnable
-        self.name = name
-
-    def invoke(self, input, config=None):
-        print(f"--- {self.name} INPUT ---")
-        print(input)
-        output = self.runnable.invoke(input, config=config)
-        print(f"--- {self.name} OUTPUT ---")
-        print(output)
-
-        # Return both original output and debug trace
-        return {
-            **(input if isinstance(input, dict) else {"input": input}),
-            self.name: output
-        }
-
-if __name__ == "__main__":
-    chain_debug = (
-            RunnableParallel({
-                "context": DebugStep(get_context_runnable, "get_context_runnable"),
-                "question": RunnablePassthrough(),
-            })
-            | DebugStep(create_final_prompt_runnable, "create_final_prompt_runnable")
-            | DebugStep(generate_sql_llm_runnable, "generate_sql_llm_runnable")
-            | DebugStep(get_query_results_runnable, "get_query_results_runnable")
-            | DebugStep(rephrase_query_results_runnable, "rephrase_query_results_runnable")
-    )
-
-    df = pd.read_csv("data/test_data/eval_data.csv")
-    for row in df.iterrows():
-        user_question  = row["Human Language"]
-        results = chain_debug.invoke({"question": user_question})
-        print("=== FINAL RESULT ===")
-        print(results)
-        # {
-        #     "question": "Find all users who joined last week",
-        #     "get_context_runnable": "...context output...",
-        #     "create_final_prompt_runnable": "...final prompt...",
-        #     "generate_sql_llm_runnable": "SELECT * FROM users WHERE ...",
-        #     "get_query_results_runnable": "...query results...",
-        #     "rephrase_query_results_runnable": "There are 12 users who joined last week."
-        # }
-
-
-        ## Evaluation Compare
-        ## Ground true vs Predict
-        if row["Table Name ( Main)"] == results["get_context_runnable"]["TABLE_NAME"]:
-            pass
-        if row["Expected SQL Query"] == results["generate_sql_llm_runnable"]:
-            pass
-            ## Calculate Accuracy
-
+# from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+#
+# def evaluate_classification(y_true, y_pred, average='binary'):
+#     """
+#     Calculate accuracy, F1 score, recall, and precision.
+#
+#     Parameters:
+#     - y_true: list or array, true labels
+#     - y_pred: list or array, predicted labels
+#     - average: 'binary', 'micro', 'macro', or 'weighted'
+#         Use 'binary' for binary classification, 'macro'/'weighted' for multi-class.
+#
+#     Returns:
+#     - metrics: dict with accuracy, f1, precision, and recall
+#     """
+#     accuracy = accuracy_score(y_true, y_pred)
+#     f1 = f1_score(y_true, y_pred, average=average)
+#     precision = precision_score(y_true, y_pred, average=average)
+#     recall = recall_score(y_true, y_pred, average=average)
+#
+#     return {
+#         "accuracy": accuracy,
+#         "f1_score": f1,
+#         "precision": precision,
+#         "recall": recall
+#     }
+#
+# # Example usage
+# y_true = [0, 1, 1, 1, 0, 1, 0, 0]
+# y_pred = [0, 1, 0, 1, 0, 1, 1, 0]
+#
+# metrics = evaluate_classification(y_true, y_pred)
+# print(metrics)
 
 
 
